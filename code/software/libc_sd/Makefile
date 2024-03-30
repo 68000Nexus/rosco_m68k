@@ -1,17 +1,22 @@
 CC=m68k-elf-rosco-gcc
+OBJCOPY=m68k-elf-rosco-objcopy
+OBJDUMP=m68k-elf-rosco-objdump
 CFLAGS?=
 LDFLAGS?=
 
-all: filetest.bin
-
-filetest.bin: main.o
-	$(CC) $(LDFLAGS) -Wl,-Map=filetest.bin.map -o $@ $^
+all: filetest.bin filetest.dis
 
 filetest.elf: main.o
-	$(CC) $(LDFLAGS) -Wl,--oformat=elf32-m68k -Wl,-Map=filetest.elf.map -o $@ $^
+	$(CC) $(LDFLAGS) -g -Wl,-Map=filetest.map -o $@ $^
+
+filetest.dis: filetest.elf
+	$(OBJDUMP) -d $< > $@
+
+filetest.bin: filetest.elf
+	$(OBJCOPY) -O binary $< $@
 
 clean:
-	$(RM) main.o filetest.bin filetest.bin.map filetest.elf filetest.elf.map
+	$(RM) main.o filetest.bin filetest.map filetest.elf filetest.dis
 
 .PHONY: all clean
 
